@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Riesgo SUNAFIL - Ley 30709</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1A5276 0%, #2874A6 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 30px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #1A5276;
+        }
+        
+        .question-block {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #1A5276;
+        }
+        
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .option-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .option-btn:hover {
+            border-color: #1A5276;
+            background: #f0f7ff;
+        }
+        
+        .option-btn.selected {
+            background: #1A5276;
+            color: white;
+            border-color: #1A5276;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1A5276 0%, #2874A6 100%);
+            transition: width 0.3s;
+            width: 0%;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #DC3545 0%, #C82333 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.2s;
+        }
+        
+        .calculate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        .calculate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-box {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .risk-score {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .risk-level {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .risk-description {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .multa-estimada {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .multa-estimada h3 {
+            color: #DC3545;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .multa-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #DC3545;
+        }
+        
+        .multa-note {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        /* FORMULARIO DE LEAD CAPTURE */
+        .lead-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+            border: 2px solid #28A745;
+        }
+        
+        .lead-form h3 {
+            margin-bottom: 10px;
+            color: #1A5276;
+            text-align: center;
+        }
+        
+        .lead-form p {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .form-row {
+            margin-bottom: 15px;
+        }
+        
+        .form-row label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: #28A745;
+        }
+        
+        .form-row.half {
+            display: inline-block;
+            width: 48%;
+        }
+        
+        .form-row.half:first-child {
+            margin-right: 4%;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #28A745 0%, #218838 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .privacy-note {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border: 2px solid #28A745;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .success-message h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        
+        .reset-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .form-row.half {
+                width: 100%;
+                display: block;
+                margin-right: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Calculadora de Riesgo SUNAFIL</h1>
+            <p>Evaluación de Cumplimiento Ley N° 30709 - Equidad Salarial</p>
+        </div>
+
+        <div class="content">
+            <div id="questionario">
+                <div class="input-group">
+                    <label for="numColaboradores">¿Cuántos colaboradores tiene su empresa?</label>
+                    <input 
+                        type="number" 
+                        id="numColaboradores" 
+                        placeholder="Ejemplo: 75"
+                        min="1"
+                    >
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+                <p class="progress-text" id="progressText">Progreso: 0 / 7 preguntas</p>
+
+                <div id="preguntas-container"></div>
+
+                <button class="calculate-btn" id="calcularBtn" disabled>
+                    ⚠ Complete todas las preguntas
+                </button>
+            </div>
+
+            <div class="result-box" id="resultBox"></div>
+        </div>
+
+        <div class="footer">
+            <p><strong>CompensaciónIA</strong> - Cumplimiento Ley 30709 + Tecnología Avanzada</p>
+            <p style="margin-top: 10px; font-size: 12px;">
+                <strong>⚠️ Disclaimer Legal:</strong> Esta calculadora proporciona una <strong>estimación</strong> 
+                basada en la tabla oficial de SUNAFIL (DS 019-2006-TR, modificado por DS 008-2020-TR) 
+                y el valor de la UIT 2025 (S/. 5,350). La multa final puede variar según: gravedad 
+                específica de la infracción, número exacto de trabajadores afectados, existencia de 
+                agravantes o atenuantes, reincidencia y criterio del inspector SUNAFIL. Para una 
+                evaluación precisa y personalizada, solicite un diagnóstico profesional.
+            </p>
+            <p style="margin-top: 8px; font-size: 11px; color: #999;">
+                Última actualización: Enero 2026 | Base legal: Ley 28806, DS 019-2006-TR, Ley 30709
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const preguntas = [
+            {
+                id: 1,
+                texto: "¿Tienen un Cuadro de Categorías y Funciones documentado?",
+                peso: 15
+            },
+            {
+                id: 2,
+                texto: "¿El Cuadro tiene valoración objetiva con metodología documentada? (HAY, Mercer, Point Factor, etc.)",
+                peso: 20
+            },
+            {
+                id: 3,
+                texto: "¿Tienen una Política Salarial formal y actualizada?",
+                peso: 15
+            },
+            {
+                id: 4,
+                texto: "¿La Política incluye los 8 criterios del Art. 5 del Reglamento?",
+                peso: 15
+            },
+            {
+                id: 5,
+                texto: "¿Comunican la política a trabajadores al ingreso con constancia firmada?",
+                peso: 10
+            },
+            {
+                id: 6,
+                texto: "¿Pueden justificar diferencias salariales >15% con criterios objetivos?",
+                peso: 15
+            },
+            {
+                id: 7,
+                texto: "¿Han analizado la brecha salarial de género en su empresa?",
+                peso: 10
+            }
+        ];
+
+        const respuestas = {};
+        let leadData = {};
+        
+        function crearPreguntas() {
+            const container = document.getElementById('preguntas-container');
+            
+            preguntas.forEach((pregunta, index) => {
+                const block = document.createElement('div');
+                block.className = 'question-block';
+                
+                block.innerHTML = `
+                    <div class="question-text">
+                        ${index + 1}. ${pregunta.texto}
+                    </div>
+                    <div class="options">
+                        <button class="option-btn" onclick="seleccionar(${pregunta.id}, 'si', this)">
+                            ✓ Sí
+                        </button>
+                        <button class="option-btn" onclick="seleccionar(${pregunta.id}, 'no', this)">
+                            ✗ No
+                        </button>
+                        <button class="option-btn" onclick="seleccionar(${pregunta.id}, 'nosabe', this)">
+                            ? No sé
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(block);
+            });
+        }
+
+        function seleccionar(id, valor, boton) {
+            respuestas[id] = valor;
+            
+            const parent = boton.parentElement;
+            parent.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            boton.classList.add('selected');
+            
+            actualizarProgreso();
+        }
+
+        function actualizarProgreso() {
+            const respondidas = Object.keys(respuestas).length;
+            const total = preguntas.length;
+            const porcentaje = (respondidas / total) * 100;
+            
+            document.getElementById('progressBar').style.width = porcentaje + '%';
+            document.getElementById('progressText').textContent = 
+                `Progreso: ${respondidas} / ${total} preguntas`;
+            
+            const numColaboradores = document.getElementById('numColaboradores').value;
+            const btnCalcular = document.getElementById('calcularBtn');
+            
+            if (respondidas === total && numColaboradores) {
+                btnCalcular.disabled = false;
+                btnCalcular.textContent = '📊 CALCULAR RIESGO SUNAFIL';
+            } else {
+                btnCalcular.disabled = true;
+                btnCalcular.textContent = '⚠ Complete todas las preguntas';
+            }
+        }
+
+        function calcularRiesgo() {
+            let puntajeTotal = 0;
+            let puntajeMaximo = 0;
+
+            preguntas.forEach(p => {
+                puntajeMaximo += p.peso;
+                if (respuestas[p.id] === 'no' || respuestas[p.id] === 'nosabe') {
+                    puntajeTotal += p.peso;
+                }
+            });
+
+            const porcentajeRiesgo = Math.round((puntajeTotal / puntajeMaximo) * 100);
+            const nivelRiesgo = getNivelRiesgo(porcentajeRiesgo);
+            const numColaboradores = document.getElementById('numColaboradores').value;
+            const multaEstimada = estimarMulta(porcentajeRiesgo, numColaboradores);
+
+            // Guardar datos para envío posterior
+            leadData = {
+                riesgo: porcentajeRiesgo,
+                nivel: nivelRiesgo.nivel,
+                multa: multaEstimada,
+                colaboradores: numColaboradores,
+                respuestas: respuestas,
+                fecha: new Date().toISOString()
+            };
+
+            mostrarResultado(porcentajeRiesgo, nivelRiesgo, multaEstimada, numColaboradores);
+        }
+
+        function getNivelRiesgo(score) {
+            if (score <= 20) return {
+                nivel: 'BAJO',
+                color: '#28A745',
+                descripcion: 'Su empresa tiene un nivel de cumplimiento aceptable. Aún así, recomendamos una revisión profesional para asegurar que todos los documentos resistan una inspección SUNAFIL.',
+                badge: '✓ Cumplimiento Aceptable'
+            };
+            if (score <= 40) return {
+                nivel: 'MEDIO',
+                color: '#FFC107',
+                descripcion: 'Su empresa tiene gaps importantes que deben corregirse urgentemente. En una inspección SUNAFIL, existe alta probabilidad de observaciones que pueden derivar en multas.',
+                badge: '⚠ Atención Requerida'
+            };
+            if (score <= 70) return {
+                nivel: 'ALTO',
+                color: '#FF6B6B',
+                descripcion: 'Su empresa está en riesgo alto de multa significativa. Recomendamos implementación urgente de cumplimiento Ley 30709 antes de recibir notificación SUNAFIL.',
+                badge: '🚨 Riesgo Alto'
+            };
+            return {
+                nivel: 'CRÍTICO',
+                color: '#DC3545',
+                descripcion: 'Su empresa está en riesgo crítico. La probabilidad de multa máxima en caso de inspección es muy alta. Requiere intervención inmediata.',
+                badge: '🔴 Crítico - Acción Inmediata'
+            };
+        }
+
+        function estimarMulta(score, colaboradores) {
+            const num = parseInt(colaboradores) || 50;
+            let baseMulta = 0;
+            let tipoEmpresa = '';
+            
+            // UIT 2025 = S/. 5,350 (DS 309-2024-EF)
+            // Basado en DS 019-2006-TR - Tabla oficial SUNAFIL
+            
+            // Determinar base según tabla oficial SUNAFIL
+            if (num <= 5) {
+                // Microempresa 1-5 trabajadores
+                baseMulta = 1124;  // 0.21 UIT
+                tipoEmpresa = 'Microempresa';
+            } else if (num <= 10) {
+                // Microempresa 6-10 trabajadores
+                baseMulta = 3371;  // 0.63 UIT
+                tipoEmpresa = 'Microempresa';
+            } else if (num <= 20) {
+                // Pequeña empresa 11-20 trabajadores
+                baseMulta = 8614;  // 1.61 UIT
+                tipoEmpresa = 'Pequeña Empresa';
+            } else if (num <= 30) {
+                // Pequeña empresa 21-30 trabajadores
+                baseMulta = 8774;  // 1.64 UIT
+                tipoEmpresa = 'Pequeña Empresa';
+            } else if (num <= 50) {
+                // Pequeña empresa 31-50 trabajadores
+                baseMulta = 12894; // 2.41 UIT (promedio 2.14-2.68)
+                tipoEmpresa = 'Pequeña Empresa';
+            } else if (num <= 100) {
+                // Pequeña empresa 51-100 trabajadores
+                baseMulta = 27526; // 5.14 UIT (promedio rango 3.21-7.08)
+                tipoEmpresa = 'Pequeña Empresa';
+            } else if (num <= 150) {
+                // Mediana empresa 101-150 trabajadores (No MYPE 51-100)
+                baseMulta = 141882; // 26.52 UIT
+                tipoEmpresa = 'Mediana Empresa';
+            } else if (num <= 200) {
+                // Mediana empresa 151-200 trabajadores (No MYPE 101-200)
+                baseMulta = 184522; // 34.49 UIT
+                tipoEmpresa = 'Mediana Empresa';
+            } else if (num <= 300) {
+                // Grande empresa 201-300 trabajadores
+                baseMulta = 204210; // 38.17 UIT
+                tipoEmpresa = 'Grande Empresa';
+            } else {
+                // Grande empresa 301+ trabajadores
+                baseMulta = 240750; // 45.00 UIT
+                tipoEmpresa = 'Grande Empresa';
+            }
+
+            // Factor multiplicador según nivel de riesgo
+            // Ajustado para reflejar probabilidad de multa dentro del rango
+            let factor = 1.0;
+            
+            if (score <= 20) {
+                factor = 0.5;  // Riesgo BAJO: multa mínima del rango
+            } else if (score <= 40) {
+                factor = 0.75; // Riesgo MEDIO: multa baja-media
+            } else if (score <= 70) {
+                factor = 1.0;  // Riesgo ALTO: multa base
+            } else {
+                factor = 1.25; // Riesgo CRÍTICO: multa alta (sin exceder máximo legal)
+            }
+
+            const multaEstimada = Math.round(baseMulta * factor);
+            
+            // Tope máximo legal: 50.57 UIT = S/. 270,551
+            const topeMaximo = 270551;
+            const multaFinal = Math.min(multaEstimada, topeMaximo);
+
+            return multaFinal;
+        }
+
+        function mostrarResultado(score, nivel, multa, colaboradores) {
+            const resultBox = document.getElementById('resultBox');
+            const questionario = document.getElementById('questionario');
+            
+            questionario.classList.add('hidden');
+            
+            const mostrarFormulario = score > 20;
+            
+            const formularioHTML = mostrarFormulario ? `
+                <div class="lead-form">
+                    <h3>📋 Solicitar Diagnóstico de Salud Salarial Gratuito (48 horas)</h3>
+                    <p>Te enviaremos un análisis detallado de tu situación y 3 acciones correctivas priorizadas</p>
+                    
+                    <form id="leadForm" onsubmit="enviarLead(event)">
+                        <div class="form-row half">
+                            <label for="nombre">Nombre Completo *</label>
+                            <input type="text" id="nombre" required>
+                        </div>
+                        
+                        <div class="form-row half">
+                            <label for="cargo">Cargo *</label>
+                            <input type="text" id="cargo" placeholder="Ej: Gerente RRHH" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <label for="empresa">Nombre de la Empresa *</label>
+                            <input type="text" id="empresa" required>
+                        </div>
+                        
+                        <div class="form-row half">
+                            <label for="email">Email Corporativo *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        
+                        <div class="form-row half">
+                            <label for="telefono">Teléfono / WhatsApp *</label>
+                            <input type="tel" id="telefono" placeholder="+51 999 999 999" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <label for="urgencia">Nivel de Urgencia</label>
+                            <select id="urgencia">
+                                <option value="normal">Normal - Quiero prevenir</option>
+                                <option value="urgente">Urgente - Tengo notificación SUNAFIL</option>
+                                <option value="critico">Crítico - Inspección en curso</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">
+                            📧 SOLICITAR DIAGNÓSTICO GRATUITO
+                        </button>
+                        
+                        <p class="privacy-note">
+                            🔒 Tus datos están protegidos. Solo los usamos para contactarte sobre tu diagnóstico.
+                        </p>
+                    </form>
+                </div>
+                
+                <div class="success-message" id="successMessage">
+                    <h3>✅ ¡Solicitud Recibida!</h3>
+                    <p>Gracias <strong id="nombreConfirm"></strong>. Hemos recibido tu solicitud.</p>
+                    <p>Te contactaremos en las próximas <strong>24 horas</strong> al <strong id="telefonoConfirm"></strong></p>
+                    <p style="margin-top: 15px; font-size: 14px;">
+                        Revisa tu email <strong id="emailConfirm"></strong> - te enviamos un resumen de tu evaluación.
+                    </p>
+                </div>
+            ` : `
+                <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h3 style="color: #28A745; text-align: center;">✓ ¡Buen trabajo!</h3>
+                    <p style="text-align: center; margin-top: 10px;">
+                        Tu empresa tiene un nivel de cumplimiento aceptable. Aún así, te recomendamos 
+                        una revisión profesional para estar 100% seguros.
+                    </p>
+                    <p style="text-align: center; margin-top: 15px;">
+                        📧 Contacto: <strong>tu_email@ejemplo.com</strong><br>
+                        📱 WhatsApp: <strong>+51 999 999 999</strong>
+                    </p>
+                </div>
+            `;
+            
+            resultBox.style.background = nivel.color + '15';
+            resultBox.innerHTML = `
+                <div class="badge" style="background: ${nivel.color}">
+                    ${nivel.badge}
+                </div>
+                
+                <div class="risk-score" style="color: ${nivel.color}">
+                    ${score}/100
+                </div>
+                
+                <div class="risk-level" style="color: ${nivel.color}">
+                    RIESGO ${nivel.nivel}
+                </div>
+                
+                <p class="risk-description">
+                    ${nivel.descripcion}
+                </p>
+
+                <div class="multa-estimada">
+                    <h3>Multa Estimada en Caso de Inspección:</h3>
+                    <div class="multa-amount">
+                        S/. ${multa.toLocaleString('es-PE')}
+                    </div>
+                    <p class="multa-note">
+                        *Basado en ${colaboradores} colaboradores y nivel de riesgo detectado
+                    </p>
+                </div>
+
+                ${formularioHTML}
+
+                <button class="reset-btn" onclick="reiniciar()">
+                    🔄 Hacer Nueva Evaluación
+                </button>
+            `;
+            
+            resultBox.classList.add('show');
+        }
+
+        function enviarLead(event) {
+            event.preventDefault(); // Evita que la página se recargue
+            
+            // 1. Capturar botón para efecto de carga
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "📤 Enviando...";
+            submitBtn.disabled = true;
+
+            // 2. Preparar los datos del formulario + datos de evaluación
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                cargo: document.getElementById('cargo').value,
+                empresa: document.getElementById('empresa').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                urgencia: document.getElementById('urgencia').value,
+                // Datos de la evaluación (ya calculados previamente)
+                nivel: leadData.nivel || "N/A",
+                riesgo: leadData.riesgo || "0",
+                multa: leadData.multa || "0",
+                colaboradores: leadData.colaboradores || "0"
+            };
+            
+            // 3. URL DE GOOGLE APPS SCRIPT CONFIGURADA
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzqIoEtdol5CQsZR41M8bwDAQmqWoXm3h_0ra2Y3_DVWK2XZkuTzPMMFs_zoinPrbykGA/exec';
+            
+            // NOTA: Si necesitas probar sin conexión, descomenta estas 3 líneas:
+            // console.log('Lead capturado:', formData);
+            // mostrarExito(formData);
+            // return;
+
+            // 4. Enviar usando fetch
+            // NOTA CRÍTICA: NO agregamos headers para evitar problemas de CORS con Google
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(formData)
+                // NO AGREGUES: headers: {'Content-Type': 'application/json'}
+                // Esto causa error CORS con Google Apps Script
+            })
+            .then(response => {
+                // Google siempre retorna un estado opaco o redirección
+                // Asumimos éxito si no hay error de red
+                console.log('✅ Lead enviado exitosamente!', response);
+                mostrarExito(formData);
+            })
+            .catch(error => {
+                console.error('❌ Error al enviar:', error.message);
+                alert('Hubo un error al guardar tus datos. Por favor intenta nuevamente o contáctanos directamente por WhatsApp.');
+                
+                // Restaurar botón para que pueda reintentar
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+        
+        function mostrarExito(formData) {
+            // 5. Ocultar formulario y mostrar mensaje de éxito
+            document.getElementById('leadForm').style.display = 'none';
+            const successMsg = document.getElementById('successMessage');
+            
+            // Actualizar datos del mensaje de confirmación
+            document.getElementById('nombreConfirm').textContent = formData.nombre;
+            document.getElementById('telefonoConfirm').textContent = formData.telefono;
+            document.getElementById('emailConfirm').textContent = formData.email;
+            
+            successMsg.classList.add('show');
+            successMsg.style.display = 'block';
+        }
+
+        function reiniciar() {
+            for (let key in respuestas) {
+                delete respuestas[key];
+            }
+            
+            leadData = {};
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.getElementById('numColaboradores').value = '';
+            
+            actualizarProgreso();
+            
+            document.getElementById('questionario').classList.remove('hidden');
+            document.getElementById('resultBox').classList.remove('show');
+        }
+
+        document.getElementById('numColaboradores').addEventListener('input', actualizarProgreso);
+        document.getElementById('calcularBtn').addEventListener('click', calcularRiesgo);
+
+        crearPreguntas();
+    </script>
+</body>
+</html>
